@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ronyel Lanches & Café — Fazer Pedido</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://sdk.mercadopago.com/js/v2"></script>
+
 <style>
   :root {
     --gold: #C9952A;
@@ -408,100 +408,6 @@
     letter-spacing: 0.08em;
   }
 
-  /* ── MERCADO PAGO ── */
-  .mp-btn {
-    width: 100%;
-    margin-top: 10px;
-    padding: 15px;
-    background: linear-gradient(135deg, #009EE3, #00BFFF);
-    border: none;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    box-shadow: 0 4px 20px #009ee355;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .mp-btn:hover { opacity: 0.9; }
-  .mp-btn:active { transform: scale(0.98); }
-  .mp-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .or-divider {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 14px 0 4px;
-    color: var(--muted);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-  .or-divider::before, .or-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* Modal MP */
-  #mp-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: #0e0c09ee;
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-  }
-  #mp-modal.show { display: flex; }
-  .mp-modal-box {
-    background: #fff;
-    border-radius: 16px;
-    padding: 28px 24px;
-    max-width: 420px;
-    width: 92%;
-    position: relative;
-    animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
-  }
-  .mp-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .mp-modal-title {
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #333;
-  }
-  .mp-modal-close {
-    background: none;
-    border: none;
-    font-size: 1.3rem;
-    cursor: pointer;
-    color: #999;
-    line-height: 1;
-  }
-  .mp-modal-total {
-    background: #f5f5f5;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 16px;
-    font-size: 0.85rem;
-    color: #333;
-    display: flex;
-    justify-content: space-between;
-    font-weight: 600;
-  }
-  #mp-brick-container { min-height: 120px; }
 
   @media (max-width: 720px) {
     .main-wrap { grid-template-columns: 1fr; }
@@ -802,12 +708,6 @@
         🟢 Pagar via PIX
       </button>
 
-      <button class="mp-btn" id="mp-btn" onclick="openMPCheckout()" disabled>
-        💳 Pagar com Mercado Pago
-      </button>
-
-      <div class="or-divider">ou</div>
-
       <button class="submit-btn" id="submit-btn" onclick="submitOrder()" disabled>
         Enviar pedido pelo WhatsApp
       </button>
@@ -827,21 +727,6 @@
       <div class="pix-loading">Gerando QR Code... ⏳</div>
     </div>
     <button class="pix-close-btn" onclick="closePIXModal()">Cancelar</button>
-  </div>
-</div>
-
-<!-- MERCADO PAGO MODAL -->
-<div id="mp-modal">
-  <div class="mp-modal-box">
-    <div class="mp-modal-header">
-      <span class="mp-modal-title">💳 Pagar com Mercado Pago</span>
-      <button class="mp-modal-close" onclick="closeMPModal()">✕</button>
-    </div>
-    <div class="mp-modal-total">
-      <span>Total do pedido</span>
-      <span id="mp-total-display">R$ 0,00</span>
-    </div>
-    <div id="mp-brick-container"></div>
   </div>
 </div>
 
@@ -977,7 +862,6 @@
     const hasItems = Object.keys(cart).length > 0;
     const addrOk = !isDelivery || end.length > 5;
     document.getElementById('submit-btn').disabled = !(nome && wpp && pag && hasItems && addrOk);
-    document.getElementById('mp-btn').disabled = !(nome && wpp && hasItems && addrOk);
     document.getElementById('pix-btn').disabled = !(nome && wpp && hasItems && addrOk);
   }
 
@@ -1029,18 +913,7 @@
     document.getElementById('pix-modal').classList.remove('show');
   }
 
-  // ── MERCADO PAGO ──
-  const MP_PUBLIC_KEY = 'APP_USR-864ea55d-b956-4304-8378-e9660d39b220';
-  let mp = null;
-  let brickController = null;
-
-  window.addEventListener('load', () => {
-    if (typeof MercadoPago !== 'undefined') {
-      mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
-    } else {
-      console.error('SDK Mercado Pago não carregou.');
-    }
-  });
+  // ── MERCADO PAGO REMOVIDO ──
 
   function getTotal() {
     let subtotal = 0;
@@ -1049,72 +922,6 @@
     return subtotal + deliveryFee;
   }
 
-  async function openMPCheckout() {
-    if (!mp) {
-      alert('Mercado Pago ainda está carregando. Tente novamente em instantes.');
-      return;
-    }
-    const total = getTotal();
-    if (total <= 0) return;
-
-    document.getElementById('mp-total-display').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
-    document.getElementById('mp-modal').classList.add('show');
-
-    // Destrói brick anterior se existir
-    if (brickController) { await brickController.unmount(); brickController = null; }
-    document.getElementById('mp-brick-container').innerHTML = '';
-
-    const bricksBuilder = mp.bricks();
-    brickController = await bricksBuilder.create('payment', 'mp-brick-container', {
-      initialization: {
-        amount: total,
-        preferenceId: null,
-      },
-      customization: {
-        paymentMethods: {
-          creditCard: 'all',
-          debitCard: 'all',
-          ticket: 'all',
-          bankTransfer: 'all',
-          atm: 'all',
-        },
-        visual: {
-          style: { theme: 'default' }
-        }
-      },
-      callbacks: {
-        onReady: () => {},
-        onSubmit: ({ selectedPaymentMethod, formData }) => {
-          // Em produção: enviar formData para seu backend criar o pagamento
-          // Por agora: abre WhatsApp com aviso de pagamento MP
-          closeMPModal();
-          const nome = document.getElementById('nome').value.trim();
-          const end  = document.getElementById('endereco').value.trim();
-          const obs  = document.getElementById('obs').value.trim();
-          let msg = `*🍔 NOVO PEDIDO — Ronyel Lanches & Café*\n\n`;
-          msg += `👤 *Cliente:* ${nome}\n`;
-          msg += `💳 *Pagamento:* Mercado Pago (${selectedPaymentMethod})\n`;
-          msg += `🚚 *Tipo:* ${isDelivery ? 'Delivery' : 'Retirada'}\n`;
-          if (isDelivery) msg += `📍 *Endereço:* ${end}\n\n`;
-          msg += `*📋 Itens:*\n`;
-          Object.values(cart).forEach(item => {
-            msg += `• ${item.name} x${item.qty}`;
-            msg += item.price > 0 ? ` — R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')}` : ` — Consultar`;
-            msg += `\n`;
-          });
-          msg += `\n✅ *Total:* R$ ${total.toFixed(2).replace('.', ',')}\n`;
-          if (obs) msg += `📝 *Obs:* ${obs}`;
-          window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
-          document.getElementById('success-overlay').classList.add('show');
-        },
-        onError: (error) => { console.error('MP Brick error:', error); }
-      }
-    });
-  }
-
-  function closeMPModal() {
-    document.getElementById('mp-modal').classList.remove('show');
-  }
 
 
   function submitOrder() {
